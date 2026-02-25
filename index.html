@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Weather App</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="card">
+      <!-- Search -->
+      <div class="search-bar">
+        <input
+          type="text"
+          id="cityInput"
+          placeholder="Search city..."
+          autocomplete="off"
+        />
+        <button class="search-btn" id="searchBtn" aria-label="Search">
+          <svg viewBox="0 0 24 24">
+            <circle cx="11" cy="11" r="7" />
+            <line x1="16.5" y1="16.5" x2="22" y2="22" />
+          </svg>
+        </button>
+      </div>
+
+      <!-- Weather Icon — replace .icon-placeholder with your real icon -->
+      <div class="weather-icon-wrap">
+        <div class="icon-placeholder" id="weatherIcon">
+          ☀️
+          <!-- OR: <img src="YOUR_SUN_ICON.png" style="width:80px;height:80px;" alt="sun"> -->
+        </div>
+      </div>
+
+      <!-- Temperature & City -->
+      <div class="weather-info">
+        <div class="temp" id="temp">--<sup>°C</sup></div>
+        <div class="city-name" id="cityName">Enter a city</div>
+        <div class="weather-condition" id="condition"></div>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats">
+        <div class="stat">
+          <!-- REPLACE with your humidity icon -->
+          <div class="stat-icon placeholder" id="humidityIcon">
+            <img src="images/50d.png" class="stat-icon" alt="humidity" />
+          </div>
+          <div class="stat-text">
+            <div class="stat-value" id="humidity">--%</div>
+            <div class="stat-label">Humidity</div>
+          </div>
+        </div>
+
+        <div class="stat-divider"></div>
+
+        <div class="stat">
+          <!-- REPLACE with your wind icon -->
+          <div class="stat-icon placeholder" id="windIcon">
+            <!--  -->
+            <img src="images/images.png" class="stat-icon" alt="wind" />
+          </div>
+          <div class="stat-text">
+            <div class="stat-value" id="windSpeed">-- km/h</div>
+            <div class="stat-label">Wind Speed</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="status-msg" id="statusMsg"></div>
+    </div>
+
+    <script>
+      // ─────────────────────────────────────────────
+      //  CONFIG — add your API key here
+      // ─────────────────────────────────────────────
+      const API_KEY = "dba761ba3b0bdfdb3364590b98581039";
+
+      const input = document.getElementById("cityInput");
+      const searchBtn = document.getElementById("searchBtn");
+      const tempEl = document.getElementById("temp");
+      const cityEl = document.getElementById("cityName");
+      const condEl = document.getElementById("condition");
+      const humEl = document.getElementById("humidity");
+      const windEl = document.getElementById("windSpeed");
+      const statusEl = document.getElementById("statusMsg");
+      const sunIcon = document.getElementById("weatherIcon");
+
+      async function getWeather(city) {
+        if (!city.trim()) return;
+        statusEl.textContent = "Fetching weather…";
+
+        try {
+          const res = await fetch(
+            `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&units=metric&appid=${API_KEY}`,
+          );
+          if (!res.ok) throw new Error("City not found");
+          const data = await res.json();
+          console.log(data);
+          tempEl.innerHTML = `${Math.round(data.main.temp)}<sup>°C</sup>`;
+          cityEl.textContent = data.name;
+          condEl.textContent = data.weather[0].description;
+          humEl.textContent = `${data.main.humidity}%`;
+          windEl.textContent = `${(data.wind.speed * 3.6).toFixed(2)} km/h`;
+          statusEl.textContent = "";
+          const iconCode = data.weather[0].icon;
+          sunIcon.innerHTML = `<img src="https://openweathermap.org/img/wn/${iconCode}@2x.png">`;
+
+          // TODO: update weatherIcon based on data.weather[0].icon
+        } catch (err) {
+          statusEl.textContent = err.message;
+        }
+      }
+
+      searchBtn.addEventListener("click", () => getWeather(input.value));
+      input.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") getWeather(input.value);
+      });
+    </script>
+  </body>
+</html>
